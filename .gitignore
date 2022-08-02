@@ -1,8 +1,9 @@
 *.swp
 obj
-dist/
+dist
 build-tools/bin/
 images/*.yml
 .go/
 tags
 tmp/
+/pkg/pillar/.vscode
