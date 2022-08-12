@@ -34,7 +34,7 @@ func createVolume(ctx *volumemgrContext, status types.VolumeStatus) (bool, strin
 
 // createVdiskVolume does not update status but returns
 // new values for VolumeCreated, FileLocation, and error
-func createVdiskVolume(ctx *volumemgrContext, status types.VolumeStatus,
+func createVdiskVolume(ctx *volumemgrContext, volumeStatus types.VolumeStatus,
 	ref string) (bool, string, error) {
 
 	created := false
@@ -42,7 +42,7 @@ func createVdiskVolume(ctx *volumemgrContext, status types.VolumeStatus,
 	persistFsType := ctx.persistType
 
 	// this is the target location, where we expect the volume to be
-	filelocation := status.PathName()
+	filelocation := volumeStatus.PathName()
 
 	createContext := context.Background()
 
@@ -62,10 +62,10 @@ func createVdiskVolume(ctx *volumemgrContext, status types.VolumeStatus,
 		for {
 			select {
 			case <-timer.C:
-				st := lookupVolumeStatus(ctx, status.Key())
+				st := lookupVolumeStatus(ctx, volumeStatus.Key())
 				//it disappears in case of deleting of volume config
 				if st == nil {
-					log.Warnf("createVdiskVolume: VolumeStatus(%s) disappear during creation", status.Key())
+					log.Warnf("createVdiskVolume: VolumeStatus(%s) disappear during creation", volumeStatus.Key())
 					createCancel()
 					return
 				}
@@ -79,7 +79,7 @@ func createVdiskVolume(ctx *volumemgrContext, status types.VolumeStatus,
 	if persistFsType != types.PersistZFS {
 		if _, err := os.Stat(filelocation); err == nil {
 			errStr := fmt.Sprintf("Can not create %s for %s: exists",
-				filelocation, status.Key())
+				filelocation, volumeStatus.Key())
 			log.Error(errStr)
 			return created, "", errors.New(errStr)
 		}
@@ -87,7 +87,7 @@ func createVdiskVolume(ctx *volumemgrContext, status types.VolumeStatus,
 
 	switch persistFsType {
 	case types.PersistZFS:
-		zVolName := status.ZVolName()
+		zVolName := volumeStatus.ZVolName()
 		zVolDevice := zfs.GetZVolDeviceByDataset(zVolName)
 		if zVolDevice == "" {
 			errStr := fmt.Sprintf("Error finding zfs zvol %s", zVolName)
@@ -95,10 +95,10 @@ func createVdiskVolume(ctx *volumemgrContext, status types.VolumeStatus,
 			return created, "", errors.New(errStr)
 		}
 		if ref != "" {
-			pathToFile, err := getVolumeFilePath(ctx, status)
+			pathToFile, err := getVolumeFilePath(ctx, volumeStatus)
 			if err != nil {
 				errStr := fmt.Sprintf("Error obtaining file for zvol at volume %s, error=%v",
-					status.Key(), err)
+					volumeStatus.Key(), err)
 				log.Error(errStr)
 				return created, "", errors.New(errStr)
 			}
@@ -165,7 +165,7 @@ func createVdiskVolume(ctx *volumemgrContext, status types.VolumeStatus,
 				return created, filelocation, errors.New(errStr)
 			}
 			// Do we need to expand disk?
-			if err := maybeResizeDisk(createContext, filelocation, status.MaxVolSize); err != nil {
+			if err := maybeResizeDisk(createContext, filelocation, volumeStatus.MaxVolSize); err != nil {
 				log.Error(err)
 				return created, filelocation, err
 			}
@@ -174,7 +174,7 @@ func createVdiskVolume(ctx *volumemgrContext, status types.VolumeStatus,
 				return created, filelocation, err
 			}
 		} else {
-			if err := diskmetrics.CreateImg(createContext, log, filelocation, strings.ToLower(status.ContentFormat.String()), status.MaxVolSize); err != nil {
+			if err := diskmetrics.CreateImg(createContext, log, filelocation, strings.ToLower(volumeStatus.ContentFormat.String()), volumeStatus.MaxVolSize); err != nil {
 				log.Error(err)
 				return created, filelocation, err
 			}
@@ -200,7 +200,7 @@ func createVdiskVolume(ctx *volumemgrContext, status types.VolumeStatus,
 
 	log.Functionf("Extract DONE from %s to %s", ref, filelocation)
 
-	log.Functionf("createVdiskVolume(%s) DONE", status.Key())
+	log.Functionf("createVdiskVolume(%s) DONE", volumeStatus.Key())
 	return true, filelocation, nil
 }
 
