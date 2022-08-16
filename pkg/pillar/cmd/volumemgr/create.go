@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/lf-edge/edge-containers/pkg/registry"
+	zconfig "github.com/lf-edge/eve/api/go/config"
 	"github.com/lf-edge/eve/pkg/pillar/cas"
 	"github.com/lf-edge/eve/pkg/pillar/diskmetrics"
 	"github.com/lf-edge/eve/pkg/pillar/tgt"
@@ -83,6 +84,10 @@ func createVdiskVolume(ctx *volumemgrContext, volumeStatus types.VolumeStatus,
 			log.Error(errStr)
 			return created, "", errors.New(errStr)
 		}
+	}
+
+	if volumeStatus.ContentFormat == zconfig.Format_AppCustomBlob {
+		return true, "", nil
 	}
 
 	switch persistFsType {
