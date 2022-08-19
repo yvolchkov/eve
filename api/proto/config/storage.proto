@@ -95,6 +95,7 @@ enum Target {
   Kernel = 2;
   Initrd = 3;
   RamDisk = 4;
+  AppCustom = 5;
   // XXX DeviceTree?
 }
 
@@ -147,6 +148,12 @@ message ContentTree {
   // instance. In case of new instance using the same content tree, EVE will get
   // new content tree UUID in the device configuration from the controller.
   int64 generation_count = 9;
+
+  // An arbitrary string. Usage depends on the content purpuse. Currently the
+  // only usage is with custom application blobs - this string will appear in
+  // the restAPI endpoint available at http://169.254.169.254. So user
+  // application can read that data and treat the blob accordingly.
+  string customMetaData = 10;
 }
 
 // The protocol that the task will use to access the Volume
@@ -192,7 +199,8 @@ message Volume {
   int64 maxsizebytes = 5;
   bool readonly = 6;       // Will be offered to tasks as read-only
   string displayName = 7;  // Optional friendly name echo'ed in info message
-  bool clear_text = 8;  // Flag to indicate the volume encryption needed or not
+  bool clear_text = 8;     // Flag to indicate the volume encryption needed or not
+  enum Target = 9;         // The type of the volume. At the moment only the AppCustom is used
 }
 
 // DiskConfigType is the desired configuration of disks
