@@ -1,7 +1,7 @@
 #!/bin/bash
 
 yq() {
-  docker run --rm -i -v "${PWD}":/workdir yq-"${USER}" "$@"
+  docker run --rm -i -v "${PWD}":/workdir mikefarah/yq "$@"
 }
 
 process-image-template() {

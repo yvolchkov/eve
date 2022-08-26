@@ -214,7 +214,6 @@ QEMU_OPTS=$(QEMU_OPTS_COMMON) $(QEMU_ACCEL) $(QEMU_OPTS_$(ZARCH)) $(QEMU_OPTS_CO
 GOOS=linux
 CGO_ENABLED=1
 GOBUILDER=eve-build-$(shell echo $(USER) | tr A-Z a-z)
-YQ=yq-$(shell echo $(USER) | tr A-Z a-z)
 
 # if proxy is set, use it when building docker builder
 ifneq ($(HTTP_PROXY),)
@@ -663,10 +662,6 @@ ifneq ($(BUILD),local)
 endif
 	$(QUIET): $@: Succeeded
 
-$(YQ):
-	@echo "Creating go builder image for user $(USER)"
-	$(QUIET)docker build git@github.com:yvolchkov/yq.git \
-		--build-arg USER_ID=$(UID) --build-arg GROUP_ID=$(GID) -t $@
 #
 # Common, generalized rules
 #
@@ -702,7 +697,7 @@ eve-%: pkg/%/Dockerfile build-tools $(RESCAN_DEPS)
 	$(QUIET)if [ -n "$(PRUNE)" ]; then docker image prune -f; fi
 	$(QUIET): "$@: Succeeded (intermediate for pkg/%)"
 
-images/rootfs-%.yml.in: images/rootfs.yml.in $(YQ) FORCE
+images/rootfs-%.yml.in: images/rootfs.yml.in FORCE
 	$(QUITE)tools/compose-image-yml.sh $< $@ "$(ROOTFS_VERSION)-$*-$(ZARCH)"
 
 images-patches := $(wildcard images/*.patch)
