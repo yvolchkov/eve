@@ -386,6 +386,7 @@ type DiskConfig struct {
 	MountDir     string
 	DisplayName  string
 	WWN          string
+	Target       zconfig.Target
 }
 
 type DiskStatus struct {
