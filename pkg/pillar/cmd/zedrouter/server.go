@@ -754,6 +754,20 @@ func (hdl AppInfoHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	log.Tracef("wwanAppInfoHandler.ServeHTTP")
 	w.Header().Add("Content-Type", "application/json")
 
+	// log.Tracef("networkHandler.ServeHTTP")
+	remoteIP := net.ParseIP(strings.Split(r.RemoteAddr, ":")[0])
+	//externalIP, code := getExternalIPForApp(hdl.ctx, remoteIP)
+	anStatus := lookupAppNetworkStatusByAppIP(hdl.ctx, remoteIP)
+	if anStatus == nil {
+		log.Errorf("Could not find network instance by ip %v", remoteIP)
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("not found"))
+		return
+	}
+
+	diskStatusList := lookupVolumeRefList(hdl.ctx, anStatus.UUIDandVersion.UUID.String())
+	log.Warnf("found diskStatusList %v\n", diskStatusList)
+
 	patch := types.AppPatchesAvailable{
 		FromVersion: "001",
 		ToVersion:   "002",
