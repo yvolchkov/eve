@@ -775,7 +775,7 @@ func (hdl AppInfoHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		patch := types.AppPatchesAvailable{
-			CustomMeta:  "test",
+			CustomMeta:  st.CustomMeta,
 			DownloadURL: fmt.Sprintf("http:/169.254.169.254/eve/app-patches/%s", st.DisplayName),
 		}
 
