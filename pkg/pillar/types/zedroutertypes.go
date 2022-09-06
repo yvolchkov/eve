@@ -3588,8 +3588,7 @@ type WwanNetworkMetrics struct {
 }
 
 type AppPatchesAvailable struct {
-	FromVersion string `json:"from-version"`
-	ToVersion   string `json:"to-version"`
+	CustomMeta  string `jsone:"custom-meta"`
 	DownloadURL string `jsone:"download-url"`
 }
 

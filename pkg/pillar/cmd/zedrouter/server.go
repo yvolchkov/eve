@@ -768,13 +768,20 @@ func (hdl AppInfoHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	diskStatusList := lookupVolumeRefList(hdl.ctx, anStatus.UUIDandVersion.UUID.String())
 	log.Warnf("found diskStatusList %v\n", diskStatusList)
 
-	patch := types.AppPatchesAvailable{
-		FromVersion: "001",
-		ToVersion:   "002",
-		DownloadURL: "http:/169.254.169.254/eve/app-patches/deadbeaf.bin",
+	var patches []types.AppPatchesAvailable
+	for _, st := range diskStatusList {
+		if st.Devtype != "AppCustom" {
+			continue
+		}
+
+		patch := types.AppPatchesAvailable{
+			CustomMeta:  "test",
+			DownloadURL: fmt.Sprintf("http:/169.254.169.254/eve/app-patches/%s", st.DisplayName),
+		}
+
+		patches = append(patches, patch)
 	}
 
-	patches := []types.AppPatchesAvailable{patch}
 	resp, _ := json.Marshal(patches)
 	w.WriteHeader(http.StatusOK)
 	w.Write(resp)
