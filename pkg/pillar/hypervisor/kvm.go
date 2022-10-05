@@ -507,7 +507,7 @@ func (ctx kvmContext) Setup(status types.DomainStatus, config types.DomainConfig
 		}
 	}
 
-	logrus.Debugf("Qemu overhead for domain %s is %d bytes", status.DomainName, qemuOverHead)
+	logrus.Warnf("Qemu overhead for domain %s is %d bytes", status.DomainName, qemuOverHead)
 	spec.AdjustMemLimit(config, qemuOverHead)
 	spec.Get().Process.Args = args
 	logrus.Infof("Hypervisor args: %v", args)
